@@ -20,6 +20,7 @@ struct RatingControl<Value>: View
                 .font(.headline)
 
             Segments(value: $value)
+                .frame(height: 10)
 
             Text(value.description)
                 .font(.callout)
@@ -52,7 +53,7 @@ extension RatingControl {
 
 extension RatingControl {
 
-    fileprivate struct Segments: View {
+    private struct Segments: View {
         @Binding var value: Value
 
         private func drag(percentage: CGFloat) {
@@ -70,11 +71,10 @@ extension RatingControl {
                 }
             }
             .onDragGesture { drag(percentage: $0.x) }
-            .frame(height: 10)
         }
     }
 
-    fileprivate struct Segment: View {
+    private struct Segment: View {
         let filled: Bool
         var body: some View {
             filled ? Color.blue : .gray
