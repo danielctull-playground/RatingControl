@@ -1,7 +1,13 @@
 
 import SwiftUI
 
-struct RatingControl: View {
+struct RatingControl<Value>: View
+    where
+    Value: CaseIterable,
+    Value.AllCases: RandomAccessCollection,
+    Value: Comparable,
+    Value: Identifiable
+{
 
     @Binding var value: Value
 
@@ -15,17 +21,6 @@ struct RatingControl: View {
         }
         .frame(height: 10)
     }
-}
-
-extension RatingControl {
-
-    enum Value: CaseIterable, Comparable {
-        case one, two, three, four, five
-    }
-}
-
-extension RatingControl.Value: Identifiable {
-    var id: Self { self }
 }
 
 extension RatingControl {
