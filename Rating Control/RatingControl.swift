@@ -28,26 +28,7 @@ struct RatingControl<Value>: View
         .accessibilityElement()
         .accessibilityLabel(title)
         .accessibilityValue(value.description)
-        .accessibilityAdjustableAction(adjust)
-    }
-}
-
-extension RatingControl {
-
-    private func adjust(direction: AccessibilityAdjustmentDirection) {
-        let values = Value.allCases
-        guard values.count > 1 else { return }
-        guard let index = values.firstIndex(of: value) else { return }
-        switch direction {
-        case .increment:
-            guard index < values.index(before: values.endIndex) else { return }
-            value = values[values.index(after: index)]
-        case .decrement:
-            guard index > values.startIndex else { return }
-            value = values[values.index(before: index)]
-        @unknown default:
-            return
-        }
+        .accessibilityAdjustableAction { value = Value.allCases.adjust(value, direction: $0) }
     }
 }
 
@@ -56,13 +37,6 @@ extension RatingControl {
     private struct Segments: View {
         @Binding var value: Value
 
-        private func drag(percentage: CGFloat) {
-            let values = Value.allCases
-            let offset = Int(floor(CGFloat(values.count) * percentage))
-            let limitedOffset = max(0, min(values.count - 1, offset))
-            value = values[values.index(values.startIndex, offsetBy: limitedOffset)]
-        }
-
         var body: some View {
             HStack(spacing: 1) {
                 ForEach(Value.allCases) { value in
@@ -70,7 +44,7 @@ extension RatingControl {
                         .onTapGesture { self.value = value }
                 }
             }
-            .onDragGesture { drag(percentage: $0.x) }
+            .onDragGesture { value = Value.allCases.value(at: $0.x) }
         }
     }
 
@@ -94,5 +68,42 @@ extension View {
                 f(CGPoint(x: x, y: y))
             })
         }
+    }
+}
+
+extension RandomAccessCollection where Element: Equatable {
+
+    fileprivate func adjust(
+        _ element: Element,
+        direction: AccessibilityAdjustmentDirection
+    ) -> Element {
+        guard let index = firstIndex(of: element) else { return element }
+        return self[adjust(index, direction: direction)]
+    }
+}
+
+extension RandomAccessCollection {
+
+    fileprivate func adjust(
+        _ index: Index,
+        direction: AccessibilityAdjustmentDirection
+    ) -> Index {
+        guard count > 1 else { return index }
+        switch direction {
+        case .increment:
+            guard index < self.index(before: endIndex) else { return index }
+            return self.index(after: index)
+        case .decrement:
+            guard index > startIndex else { return index }
+            return self.index(before: index)
+        @unknown default:
+            return index
+        }
+    }
+
+    fileprivate func value(at percentage: CGFloat) -> Element {
+        let offset = Int(floor(CGFloat(count) * percentage))
+        let limitedOffset = Swift.max(0, Swift.min(count - 1, offset))
+        return self[index(startIndex, offsetBy: limitedOffset)]
     }
 }
