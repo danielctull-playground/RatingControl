@@ -2,13 +2,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        RatingControl().padding()
-    }
-}
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+    @State var value = RatingControl.Value.one
+    var body: some View {
+        RatingControl(value: $value)
+            .padding()
     }
 }

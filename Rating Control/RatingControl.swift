@@ -3,7 +3,7 @@ import SwiftUI
 
 struct RatingControl: View {
 
-    @State var value: Value = .one
+    @Binding var value: Value
 
     var body: some View {
         HStack(spacing: 1) {
