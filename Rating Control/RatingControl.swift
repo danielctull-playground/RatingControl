@@ -6,13 +6,17 @@ struct RatingControl<Value>: View
     Value: CaseIterable,
     Value.AllCases: RandomAccessCollection,
     Value: Comparable,
+    Value: CustomStringConvertible,
     Value: Identifiable
 {
 
     @Binding var value: Value
 
     var body: some View {
-        Segments(value: $value)
+        VStack(alignment: .leading) {
+            Segments(value: $value)
+            Text(value.description)
+        }
     }
 }
 

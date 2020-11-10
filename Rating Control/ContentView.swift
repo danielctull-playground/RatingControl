@@ -9,6 +9,18 @@ extension Rating: Identifiable {
     var id: Self { self }
 }
 
+extension Rating: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .one: return "One"
+        case .two: return "Two"
+        case .three: return "Three"
+        case .four: return "Four"
+        case .five: return "Five"
+        }
+    }
+}
+
 struct ContentView: View {
 
     @State var value = Rating.one
