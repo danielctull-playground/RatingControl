@@ -54,14 +54,22 @@ extension RatingControl {
 
     fileprivate struct Segments: View {
         @Binding var value: Value
+
+        private func drag(percentage: CGFloat) {
+            let values = Value.allCases
+            let offset = Int(floor(CGFloat(values.count) * percentage))
+            let limitedOffset = max(0, min(values.count - 1, offset))
+            value = values[values.index(values.startIndex, offsetBy: limitedOffset)]
+        }
+
         var body: some View {
             HStack(spacing: 1) {
                 ForEach(Value.allCases) { value in
-                    Button(action: { self.value = value }) {
-                        Segment(filled: value <= self.value)
-                    }
+                    Segment(filled: value <= self.value)
+                        .onTapGesture { self.value = value }
                 }
             }
+            .onDragGesture { drag(percentage: $0.x) }
             .frame(height: 10)
         }
     }
@@ -70,6 +78,21 @@ extension RatingControl {
         let filled: Bool
         var body: some View {
             filled ? Color.blue : .gray
+        }
+    }
+}
+
+extension View {
+
+    fileprivate func onDragGesture(
+        _ f: @escaping (CGPoint) -> ()
+    ) -> some View {
+        GeometryReader { geometry in
+            gesture(DragGesture().onChanged { drag in
+                let x = drag.location.x / geometry.size.width
+                let y = drag.location.y / geometry.size.height
+                f(CGPoint(x: x, y: y))
+            })
         }
     }
 }
