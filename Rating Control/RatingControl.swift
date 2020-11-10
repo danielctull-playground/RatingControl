@@ -10,12 +10,18 @@ struct RatingControl<Value>: View
     Value: Identifiable
 {
 
+    let title: String
     @Binding var value: Value
 
     var body: some View {
         VStack(alignment: .leading) {
+            Text(title)
+                .font(.headline)
+
             Segments(value: $value)
+
             Text(value.description)
+                .font(.callout)
         }
     }
 }

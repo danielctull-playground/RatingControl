@@ -25,7 +25,7 @@ struct ContentView: View {
 
     @State var value = Rating.one
     var body: some View {
-        RatingControl(value: $value)
+        RatingControl(title: "Rating", value: $value)
             .padding()
     }
 }
