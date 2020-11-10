@@ -35,16 +35,15 @@ extension RatingControl {
 
     private func adjust(direction: AccessibilityAdjustmentDirection) {
         let values = Value.allCases
+        guard values.count > 1 else { return }
         guard let index = values.firstIndex(of: value) else { return }
         switch direction {
         case .increment:
-            let last = values.index(before: values.endIndex)
-            guard let new = values.index(index, offsetBy: 1, limitedBy: last) else { return }
-            value = values[new]
+            guard index < values.index(before: values.endIndex) else { return }
+            value = values[values.index(after: index)]
         case .decrement:
-            let first = values.startIndex
-            guard let new = values.index(index, offsetBy: -1, limitedBy: first) else { return }
-            value = values[new]
+            guard index > values.startIndex else { return }
+            value = values[values.index(before: index)]
         @unknown default:
             return
         }
