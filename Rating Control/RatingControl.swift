@@ -15,6 +15,7 @@ struct RatingControl<Value>: View
 
     var body: some View {
         VStack(alignment: .leading) {
+
             Text(title)
                 .font(.headline)
 
@@ -22,7 +23,6 @@ struct RatingControl<Value>: View
 
             Text(value.description)
                 .font(.callout)
-
         }
         .accessibilityElement()
         .accessibilityLabel(title)
