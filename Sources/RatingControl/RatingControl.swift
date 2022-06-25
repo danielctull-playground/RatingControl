@@ -4,7 +4,7 @@ import SwiftUI
 public struct RatingControl<Data>: View
     where
     Data: RandomAccessCollection,
-    Data.Element: Comparable,
+    Data.Element: Equatable,
     Data.Element: CustomStringConvertible,
     Data.Element: Identifiable
 {
@@ -52,17 +52,21 @@ extension RatingControl {
 private struct Segments<Data>: View
     where
     Data: RandomAccessCollection,
-    Data.Element: Comparable,
+    Data.Element: Equatable,
     Data.Element: CustomStringConvertible,
     Data.Element: Identifiable
 {
     let data: Data
     @Binding var selection: Data.Element
 
+    func index(of element: Data.Element) -> Data.Index {
+        data.firstIndex(of: element) ?? data.startIndex
+    }
+
     var body: some View {
         HStack(spacing: 1) {
             ForEach(data) { element in
-                Segment(filled: element <= selection)
+                Segment(filled: index(of: element) <= index(of: selection))
                     .onTapGesture { selection = element }
             }
         }
