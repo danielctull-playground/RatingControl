@@ -40,12 +40,12 @@ public struct RatingControl<Data>: View
 
 extension RatingControl {
 
-    public init<Value>(title: String, value: Binding<Value>)
+    public init<Value>(title: String, selection: Binding<Value>)
         where
         Value: CaseIterable,
         Value.AllCases == Data
     {
-        self.init(title: title, data: Value.allCases, selection: value)
+        self.init(title: title, data: Value.allCases, selection: selection)
     }
 }
 
@@ -153,9 +153,9 @@ extension Rating: CustomStringConvertible {
 
 struct ContentView: View {
 
-    @State var value = Rating.one
+    @State var selection = Rating.one
     var body: some View {
-        RatingControl(title: "Rating", value: $value)
+        RatingControl(title: "Rating", selection: $selection)
             .padding()
     }
 }
