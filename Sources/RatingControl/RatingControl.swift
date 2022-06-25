@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-struct RatingControl<Value>: View
+public struct RatingControl<Value>: View
     where
     Value: CaseIterable,
     Value.AllCases: RandomAccessCollection,
@@ -10,10 +10,15 @@ struct RatingControl<Value>: View
     Value: Identifiable
 {
 
-    let title: String
-    @Binding var value: Value
+    public init(title: String, value: Binding<Value>) {
+        self.title = title
+        self._value = value
+    }
 
-    var body: some View {
+    private let title: String
+    @Binding private var value: Value
+
+    public var body: some View {
         VStack(alignment: .leading) {
 
             Text(title)

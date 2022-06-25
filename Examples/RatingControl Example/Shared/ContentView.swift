@@ -1,4 +1,5 @@
 
+import RatingControl
 import SwiftUI
 
 enum Rating: CaseIterable, Comparable {
