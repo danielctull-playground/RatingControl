@@ -1,44 +1,46 @@
 
 import SwiftUI
 
-public struct RatingControl<Data, Label>: View
+public struct RatingControl<Data, Label, ValueLabel>: View
     where
     Data: RandomAccessCollection,
     Data.Element: Equatable,
-    Data.Element: CustomStringConvertible,
     Data.Element: Identifiable,
-    Label: View
+    Label: View,
+    ValueLabel: View
 {
 
     public init(
         data: Data,
         selection: Binding<Data.Element>,
-        @ViewBuilder label: () -> Label
+        @ViewBuilder label: () -> Label,
+        @ViewBuilder valueLabel: @escaping (Data.Element) -> ValueLabel
     ) {
         self.data = data
         self._selection = selection
         self.label = label()
+        self.valueLabel = valueLabel
     }
 
     private let label: Label
+    private let valueLabel: (Data.Element) -> ValueLabel
     private let data: Data
     @Binding private var selection: Data.Element
 
     @State private var number = 0
 
     public var body: some View {
-        VStack(alignment: .leading) {
+        VStack {
 
             label
 
             Segments(data: data, selection: $selection)
                 .frame(height: 10)
 
-            Text(selection.description)
-                .font(.callout)
+            valueLabel(selection)
         }
         .accessibilityElement()
-        .accessibilityValue(selection.description)
+        .accessibilityValue(String(describing: selection))
         .accessibilityAdjustableAction { selection = data.adjust(selection, direction: $0) }
     }
 }
@@ -47,14 +49,36 @@ extension RatingControl {
 
     public init<Value>(
         selection: Binding<Value>,
-        @ViewBuilder label: () -> Label
+        @ViewBuilder label: () -> Label,
+        @ViewBuilder valueLabel: @escaping (Data.Element) -> ValueLabel
     )
         where
         Label == Text,
         Value: CaseIterable,
         Value.AllCases == Data
     {
-        self.init(data: Value.allCases, selection: selection, label: label)
+        self.init(
+            data: Value.allCases,
+            selection: selection,
+            label: label,
+            valueLabel: valueLabel
+        )
+    }
+
+    public init<Value>(
+        selection: Binding<Value>,
+        @ViewBuilder label: () -> Label
+    )
+        where
+        Label == Text,
+        ValueLabel == Text,
+        Data.Element: CustomStringConvertible,
+        Value: CaseIterable,
+        Value.AllCases == Data
+    {
+        self.init(data: Value.allCases, selection: selection, label: label) { selection in
+            Text(selection.description)
+        }
     }
 }
 
@@ -62,7 +86,6 @@ private struct Segments<Data>: View
     where
     Data: RandomAccessCollection,
     Data.Element: Equatable,
-    Data.Element: CustomStringConvertible,
     Data.Element: Identifiable
 {
     let data: Data
