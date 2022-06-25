@@ -1,22 +1,23 @@
 
 import SwiftUI
 
-public struct RatingControl<Value>: View
+public struct RatingControl<Data>: View
     where
-    Value: CaseIterable,
-    Value.AllCases: RandomAccessCollection,
-    Value: Comparable,
-    Value: CustomStringConvertible,
-    Value: Identifiable
+    Data: RandomAccessCollection,
+    Data.Element: Comparable,
+    Data.Element: CustomStringConvertible,
+    Data.Element: Identifiable
 {
 
-    public init(title: String, value: Binding<Value>) {
+    public init(title: String, data: Data, selection: Binding<Data.Element>) {
         self.title = title
-        self._value = value
+        self.data = data
+        self._selection = selection
     }
 
     private let title: String
-    @Binding private var value: Value
+    private let data: Data
+    @Binding private var selection: Data.Element
 
     public var body: some View {
         VStack(alignment: .leading) {
@@ -24,37 +25,48 @@ public struct RatingControl<Value>: View
             Text(title)
                 .font(.headline)
 
-            Segments(value: $value)
+            Segments(data: data, selection: $selection)
                 .frame(height: 10)
 
-            Text(value.description)
+            Text(selection.description)
                 .font(.callout)
         }
         .accessibilityElement()
         .accessibilityLabel(title)
-        .accessibilityValue(value.description)
-        .accessibilityAdjustableAction { value = Value.allCases.adjust(value, direction: $0) }
+        .accessibilityValue(selection.description)
+        .accessibilityAdjustableAction { selection = data.adjust(selection, direction: $0) }
     }
 }
 
-private struct Segments<Value>: View
+extension RatingControl {
+
+    public init<Value>(title: String, value: Binding<Value>)
+        where
+        Value: CaseIterable,
+        Value.AllCases == Data
+    {
+        self.init(title: title, data: Value.allCases, selection: value)
+    }
+}
+
+private struct Segments<Data>: View
     where
-    Value: CaseIterable,
-    Value.AllCases: RandomAccessCollection,
-    Value: Comparable,
-    Value: CustomStringConvertible,
-    Value: Identifiable
+    Data: RandomAccessCollection,
+    Data.Element: Comparable,
+    Data.Element: CustomStringConvertible,
+    Data.Element: Identifiable
 {
-    @Binding var value: Value
+    let data: Data
+    @Binding var selection: Data.Element
 
     var body: some View {
         HStack(spacing: 1) {
-            ForEach(Value.allCases) { value in
-                Segment(filled: value <= self.value)
-                    .onTapGesture { self.value = value }
+            ForEach(data) { element in
+                Segment(filled: element <= selection)
+                    .onTapGesture { selection = element }
             }
         }
-        .onDragGesture { value = Value.allCases.value(at: $0.x) }
+        .onDragGesture { selection = data.value(at: $0.x) }
     }
 }
 
