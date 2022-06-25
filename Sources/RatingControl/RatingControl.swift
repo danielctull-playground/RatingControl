@@ -37,27 +37,31 @@ public struct RatingControl<Value>: View
     }
 }
 
-extension RatingControl {
+private struct Segments<Value>: View
+    where
+    Value: CaseIterable,
+    Value.AllCases: RandomAccessCollection,
+    Value: Comparable,
+    Value: CustomStringConvertible,
+    Value: Identifiable
+{
+    @Binding var value: Value
 
-    private struct Segments: View {
-        @Binding var value: Value
-
-        var body: some View {
-            HStack(spacing: 1) {
-                ForEach(Value.allCases) { value in
-                    Segment(filled: value <= self.value)
-                        .onTapGesture { self.value = value }
-                }
+    var body: some View {
+        HStack(spacing: 1) {
+            ForEach(Value.allCases) { value in
+                Segment(filled: value <= self.value)
+                    .onTapGesture { self.value = value }
             }
-            .onDragGesture { value = Value.allCases.value(at: $0.x) }
         }
+        .onDragGesture { value = Value.allCases.value(at: $0.x) }
     }
+}
 
-    private struct Segment: View {
-        let filled: Bool
-        var body: some View {
-            filled ? Color.blue : .gray
-        }
+private struct Segment: View {
+    let filled: Bool
+    var body: some View {
+        filled ? Color.blue : .gray
     }
 }
 
@@ -112,3 +116,42 @@ extension RandomAccessCollection {
         return self[index(startIndex, offsetBy: limitedOffset)]
     }
 }
+
+#if DEBUG
+
+enum Rating: CaseIterable, Comparable {
+    case one, two, three, four, five
+}
+
+extension Rating: Identifiable {
+    var id: Self { self }
+}
+
+extension Rating: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .one: return "One"
+        case .two: return "Two"
+        case .three: return "Three"
+        case .four: return "Four"
+        case .five: return "Five"
+        }
+    }
+}
+
+struct ContentView: View {
+
+    @State var value = Rating.one
+    var body: some View {
+        RatingControl(title: "Rating", value: $value)
+            .padding()
+    }
+}
+
+struct RatingControl_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
+
+#endif
