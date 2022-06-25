@@ -1,29 +1,35 @@
 
 import SwiftUI
 
-public struct RatingControl<Data>: View
+public struct RatingControl<Data, Label>: View
     where
     Data: RandomAccessCollection,
     Data.Element: Equatable,
     Data.Element: CustomStringConvertible,
-    Data.Element: Identifiable
+    Data.Element: Identifiable,
+    Label: View
 {
 
-    public init(title: String, data: Data, selection: Binding<Data.Element>) {
-        self.title = title
+    public init(
+        data: Data,
+        selection: Binding<Data.Element>,
+        @ViewBuilder label: () -> Label
+    ) {
         self.data = data
         self._selection = selection
+        self.label = label()
     }
 
-    private let title: String
+    private let label: Label
     private let data: Data
     @Binding private var selection: Data.Element
+
+    @State private var number = 0
 
     public var body: some View {
         VStack(alignment: .leading) {
 
-            Text(title)
-                .font(.headline)
+            label
 
             Segments(data: data, selection: $selection)
                 .frame(height: 10)
@@ -32,7 +38,6 @@ public struct RatingControl<Data>: View
                 .font(.callout)
         }
         .accessibilityElement()
-        .accessibilityLabel(title)
         .accessibilityValue(selection.description)
         .accessibilityAdjustableAction { selection = data.adjust(selection, direction: $0) }
     }
@@ -40,12 +45,16 @@ public struct RatingControl<Data>: View
 
 extension RatingControl {
 
-    public init<Value>(title: String, selection: Binding<Value>)
+    public init<Value>(
+        selection: Binding<Value>,
+        @ViewBuilder label: () -> Label
+    )
         where
+        Label == Text,
         Value: CaseIterable,
         Value.AllCases == Data
     {
-        self.init(title: title, data: Value.allCases, selection: selection)
+        self.init(data: Value.allCases, selection: selection, label: label)
     }
 }
 
@@ -159,8 +168,11 @@ struct ContentView: View {
 
     @State var selection = Rating.one
     var body: some View {
-        RatingControl(title: "Rating", selection: $selection)
-            .padding()
+        RatingControl(selection: $selection) {
+            Text("Rating")
+                .font(.headline)
+        }
+        .padding()
     }
 }
 
